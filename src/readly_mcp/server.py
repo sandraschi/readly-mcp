@@ -2,6 +2,7 @@ import time
 import threading
 import os
 import shutil
+import asyncio
 from typing import Optional
 from fastmcp import FastMCP
 
@@ -10,7 +11,11 @@ from .core.browser import browser_manager
 from .core.pdf import create_pdf
 
 # Initialize FastMCP
-mcp = FastMCP("Readly Scraper", dependencies=["playwright", "fpdf2", "Pillow"])
+mcp = FastMCP(
+    name="Readly Scraper",
+    instructions="MCP server for scraping Readly magazines and generating PDFs",
+    version="0.1.0"
+)
 
 # Global ephemeral state
 # In a rigorous production env, this might be a class or database,
@@ -25,7 +30,7 @@ scraping_state = {
 }
 
 
-def scraping_worker(issue_name: str, duration_per_page: float, max_pages: int):
+async def scraping_worker(issue_name: str, duration_per_page: float, max_pages: int):
     """
     Background worker that performing the scraping loop.
     """
@@ -40,7 +45,7 @@ def scraping_worker(issue_name: str, duration_per_page: float, max_pages: int):
     try:
         # 1. Ensure browser is open
         # The user must have already navigated to the issue in open_readly_browser
-        browser_manager.start_browser(headless=False)
+        await browser_manager.start_browser(headless=False)
 
         last_screenshot_path = None
 
@@ -55,7 +60,7 @@ def scraping_worker(issue_name: str, duration_per_page: float, max_pages: int):
             # 2. Capture Page
             print(f"Capturing page {i}...")
             # We assume the browser is currently ON the correct page.
-            screenshot_path = browser_manager.take_page_screenshot(issue_name, i)
+            screenshot_path = await browser_manager.take_page_screenshot(issue_name, i)
 
             # 3. Simple Duplicate Check (End of Issue Detection)
             if last_screenshot_path:
@@ -82,7 +87,7 @@ def scraping_worker(issue_name: str, duration_per_page: float, max_pages: int):
             while slept < duration_per_page:
                 if scraping_state["stop_flag"]:
                     break
-                time.sleep(1)
+                await asyncio.sleep(1)
                 slept += 1
 
             if scraping_state["stop_flag"]:
@@ -90,10 +95,10 @@ def scraping_worker(issue_name: str, duration_per_page: float, max_pages: int):
 
             # 5. Turn Page
             print("Turning page...")
-            browser_manager.turn_page_right()
+            await browser_manager.turn_page_right()
 
             # Wait for animation/load
-            time.sleep(2)
+            await asyncio.sleep(2)
 
         # 6. Compile PDF
         if scraping_state["screenshots"]:
@@ -123,18 +128,18 @@ def scraping_worker(issue_name: str, duration_per_page: float, max_pages: int):
 
 
 @mcp.tool()
-def open_readly_browser() -> str:
+async def open_readly_browser() -> str:
     """
     Opens the browser and navigates to Readly.
     Use this first to log in manually and select the magazine.
     """
-    browser_manager.start_browser(headless=False)
-    browser_manager.go_to_readly()
+    await browser_manager.start_browser(headless=False)
+    await browser_manager.go_to_readly()
     return "Browser opened. Please log in and navigate to the issue you want to scrape."
 
 
 @mcp.tool()
-def smart_scrape(
+async def smart_scrape(
     issue_name: str, interval_seconds: int = 120, max_pages: int = 200
 ) -> str:
     """
@@ -151,12 +156,10 @@ def smart_scrape(
     scraping_state["is_running"] = True
     scraping_state["issue_name"] = issue_name
 
-    t = threading.Thread(
-        target=scraping_worker, args=(issue_name, interval_seconds, max_pages)
-    )
-    t.start()
+    # Create a task to run the async scraping worker
+    asyncio.create_task(scraping_worker(issue_name, interval_seconds, max_pages))
 
-    return f"Started scraping '{issue_name}'. I will turn the page every {interval_seconds} seconds. Use 'get_scraping_status' to check progress."
+    return f"Started scraping '{issue_name}'. I will turn the page every {interval_seconds} seconds. Use 'get_status' to check progress."
 
 
 @mcp.tool()
@@ -183,3 +186,62 @@ def stop_scrape() -> str:
 
     scraping_state["stop_flag"] = True
     return "Stop signal sent. Job will terminate after the current pending wait."
+
+
+@mcp.tool()
+def help() -> str:
+    """
+    Get help information about the Readly MCP server and available tools.
+    """
+    return """Readly MCP Server - Help
+
+This server helps you scrape Readly magazines and generate PDFs.
+
+AVAILABLE TOOLS:
+
+1. open_readly_browser
+   Opens a browser window and navigates to Readly (go.readly.com).
+   Use this first to log in manually and navigate to the magazine issue you want to scrape.
+   
+   Usage: Call this tool, then log in and navigate to the first page of the issue.
+
+2. smart_scrape(issue_name, interval_seconds=120, max_pages=200)
+   Starts the scraping process in the background.
+   
+   Parameters:
+   - issue_name: Name of the magazine (used for PDF filename)
+   - interval_seconds: How long to wait on each page (default: 120 seconds / 2 minutes)
+   - max_pages: Maximum number of pages to scrape (default: 200, safety limit)
+   
+   Usage: After opening the browser and navigating to the issue, call this with the issue name.
+   Example: smart_scrape("New Scientist January 2025", interval_seconds=120, max_pages=50)
+
+3. get_status
+   Returns the current status of the scraping job.
+   
+   Returns:
+   - status: Current status (Idle, Running, Compiling PDF, Completed, Error)
+   - is_running: Whether a job is currently running
+   - issue: Name of the current issue being scraped
+   - current_page: Current page number being processed
+   - pages_captured: Number of pages captured so far
+
+4. stop_scrape
+   Stops the current scraping job gracefully.
+   The job will finish the current page wait before stopping.
+
+WORKFLOW:
+
+1. Call open_readly_browser to open Readly
+2. Log in manually and navigate to the first page of the issue you want
+3. Call smart_scrape with the issue name
+4. Use get_status to monitor progress
+5. The PDF will be saved to ~/Desktop/readly/[issue_name]_full.pdf when complete
+
+NOTES:
+
+- The browser uses a persistent session, so you only need to log in once
+- Pages are turned automatically at the specified interval
+- The scraper detects the end of an issue by comparing consecutive pages
+- Screenshots are saved temporarily and compiled into a PDF at the end
+"""
