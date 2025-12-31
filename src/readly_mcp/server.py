@@ -101,8 +101,12 @@ def scraping_worker(issue_name: str, duration_per_page: float, max_pages: int):
             scraping_state["status"] = "Compiling PDF"
 
             pdf_name = f"{issue_name}_full.pdf"
-            # Save to CWD (root of repo when running)
-            output_path = os.path.join(os.getcwd(), pdf_name)
+            # Save to Desktop/readly as requested
+            desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "readly")
+            if not os.path.exists(desktop_path):
+                os.makedirs(desktop_path)
+
+            output_path = os.path.join(desktop_path, pdf_name)
             create_pdf(scraping_state["screenshots"], output_path)
 
             print(f"Done! PDF saved to {output_path}")
