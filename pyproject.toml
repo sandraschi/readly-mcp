@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "readly-mcp"
+version = "0.1.0"
+description = "MCP server for scraping Readly magazines"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp==2.14.1",
+    "playwright>=1.40.0",
+    "fpdf2>=2.7.0",
+    "Pillow>=10.0.0"
+]
+
+[project.scripts]
+readly-mcp = "readly_mcp:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/readly_mcp"]
