@@ -7,12 +7,15 @@ name = "readly-mcp"
 version = "0.1.0"
 description = "MCP server for scraping Readly magazines"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
-    "fastmcp==2.14.1",
+    "fastmcp>=2.14.5",
+    "fastapi>=0.115.0",
     "playwright>=1.40.0",
     "fpdf2>=2.7.0",
-    "Pillow>=10.0.0"
+    "pillow>=10.0.0",
+    "uvicorn>=0.40.0",
+    "ruff>=0.15.2",
 ]
 
 [project.scripts]
@@ -20,3 +23,16 @@ readly-mcp = "readly_mcp:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/readly_mcp"]
+
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "S"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
