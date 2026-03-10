@@ -3,7 +3,7 @@
 A specialized MCP server for automating reading and scraping tasks on the Readly web platform (`go.readly.com`).
 
 ![Status](https://img.shields.io/badge/status-active-success.svg)
-![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
+![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![MCP](https://img.shields.io/badge/MCP-Standard-green.svg)
 
 ## Features
@@ -21,19 +21,38 @@ It allows you to dream big with **boat and yacht magazines**, or dive deep into 
 
 Best of all, it houses the delightfully eclectic and weird: **Fortean Times**, **The Idler**, and **The Lady**. It is a fantastic service that champions the written word in the digital age. This tool exists to help you archive your favorite paid content for personal use, celebrating the immense value Readly provides.
 
-## Installation
+## 🚀 Installation
 
 ### Prerequisites
-- Python 3.10+
-- A valid [Readly](https://www.readly.com) account.
+- [uv](https://docs.astral.sh/uv/) installed (recommended)
+- Python 3.12+
+- A valid [Readly](https://www.readly.com) account
 
-### Setup
+### 📦 Quick Start
+Run immediately via `uvx`:
+```bash
+uvx readly-mcp
+```
+
+### 🎯 Claude Desktop Integration
+Add to your `claude_desktop_config.json`:
+```json
+"mcpServers": {
+  "readly-mcp": {
+    "command": "uv",
+    "args": ["--directory", "D:/Dev/repos/readly-mcp", "run", "readly-mcp"]
+  }
+}
+```
+
+### Setup (from source)
 ```bash
 git clone https://github.com/yourusername/readly-mcp.git
 cd readly-mcp
-pip install -e .
+uv sync
 playwright install chromium
 ```
+Key dependencies: FastMCP, FastAPI, uvicorn, Playwright, fpdf2, Pillow (see `pyproject.toml`).
 
 ## Usage
 
@@ -56,6 +75,13 @@ Once logged in:
 - `src/readly_mcp/`: Source code.
 - `tests/`: Pytest suite.
 - `docs/`: Architecture and API documentation.
+
+### Running the HTTP/SSE server
+For web or SSE transport (FastAPI + uvicorn):
+```bash
+uv run readly-mcp --web
+```
+Uses `WEB_PORT` (default 10863). Requires FastAPI and uvicorn (included in dependencies).
 
 ### Testing
 ```bash

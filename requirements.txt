@@ -1,5 +1,0 @@
-fastmcp==2.14.1
-playwright
-fpdf2
-Pillow
-uvicorn

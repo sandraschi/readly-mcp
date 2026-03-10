@@ -1,13 +1,9 @@
-import asyncio
-from .server import mcp
+from .server import main
 
 
-def main():
-    """
-    Entry point for the application script.
-    """
-    asyncio.run(mcp.run_stdio_async())
+def run():
+    main()
 
 
 if __name__ == "__main__":
-    main()
+    run()
