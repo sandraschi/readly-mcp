@@ -47,7 +47,7 @@ Add to your `claude_desktop_config.json`:
 
 ### Setup (from source)
 ```bash
-git clone https://github.com/yourusername/readly-mcp.git
+git clone https://github.com/sandraschi/readly-mcp.git
 cd readly-mcp
 uv sync
 playwright install chromium
