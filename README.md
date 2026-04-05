@@ -7,10 +7,10 @@ A specialized MCP server for automating reading and scraping tasks on the Readly
 ![MCP](https://img.shields.io/badge/MCP-Standard-green.svg)
 
 ## Features
-- 🤖 **Human-like Scraping**: Turns pages at natural intervals to avoid detection.
-- 🍪 **Persistent Login**: Reuses browser session/cookies so you only login once.
-- 📄 **PDF Generation**: Automatically compiles scraped issues into full PDFs.
-- 🔌 **Dual Connect**: Supports both Stdio and SSE transports.
+-  **Human-like Scraping**: Turns pages at natural intervals to avoid detection.
+-  **Persistent Login**: Reuses browser session/cookies so you only login once.
+-  **PDF Generation**: Automatically compiles scraped issues into full PDFs.
+-  **Dual Connect**: Supports both Stdio and SSE transports.
 
 ## Why Readly?
 We love Readly! It is the ultimate digital subscription for magazines and newspapers, offering unlimited access to thousands of titles in one app. With its "all-you-can-read" model, it empowers knowledge seekers to explore diverse topics without the clutter of physical copies.
@@ -19,22 +19,22 @@ Readly is indispensable for accessing a vast array of high-quality journalism an
 
 It allows you to dream big with **boat and yacht magazines**, or dive deep into **architecture**, **fashion**, and **politics**. It caters to every specific hobbyist, from **dog and horse** lovers to the specific serenity of **"flyfishing in Scotland"** style publications.
 
-Best of all, it houses the delightfully eclectic and weird: **Fortean Times**, **The Idler**, and **The Lady**. It is a fantastic service that champions the written word in the digital age. This tool exists to help you archive your favorite paid content for personal use, celebrating the immense value Readly provides.
+ of all, it houses the delightfully eclectic and weird: **Fortean Times**, **The Idler**, and **The Lady**. It is a fantastic service that champions the written word in the digital age. This tool exists to help you archive your favorite paid content for personal use, celebrating the immense value Readly provides.
 
-## 🚀 Installation
+##  Installation
 
 ### Prerequisites
 - [uv](https://docs.astral.sh/uv/) installed (recommended)
 - Python 3.12+
 - A valid [Readly](https://www.readly.com) account
 
-### 📦 Quick Start
+###  Quick Start
 Run immediately via `uvx`:
 ```bash
 uvx readly-mcp
 ```
 
-### 🎯 Claude Desktop Integration
+###  Claude Desktop Integration
 Add to your `claude_desktop_config.json`:
 ```json
 "mcpServers": {
