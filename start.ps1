@@ -1,29 +1,20 @@
-# Webapp Start - Standardized SOTA (Auto-Repaired V2.5)
-$WebPort = 10911
-$BackendPort = 10912
-$ProjectRoot = Split-Path -Parent $PSScriptRoot
+Param([switch]$Headless)
 
-# 1. Kill any process squatting on the ports
-Write-Host "Checking for port squatters on $WebPort and $BackendPort..." -ForegroundColor Yellow
-$pids = Get-NetTCPConnection -LocalPort $WebPort, $BackendPort -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -gt 4 } | Select-Object -ExpandProperty OwningProcess -Unique
-foreach ($p in $pids) {
-    Write-Host "Found squatter (PID: $p). Terminating..." -ForegroundColor Red
-    try { Stop-Process -Id $p -Force -ErrorAction Stop } catch { Write-Host "Warning: Could not terminate PID $p." -ForegroundColor Gray }
+# --- SOTA Headless Standard ---
+if ($Headless -and ($Host.UI.RawUI.WindowTitle -notmatch 'Hidden')) {
+    Start-Process pwsh -ArgumentList '-NoProfile', '-File', $PSCommandPath, '-Headless' -WindowStyle Hidden
+    exit
 }
+$WindowStyle = if ($Headless) { 'Hidden' } else { 'Normal' }
+# ------------------------------
 
-# 2. Setup
+$env:FASTMCP_LOG_LEVEL = 'WARNING'
+# readly-mcp Start - Standards-Compliant SOTA
+Write-Host 'Starting readly-mcp...' -ForegroundColor Cyan
+
 Set-Location $PSScriptRoot
-if (-not (Test-Path "node_modules")) { npm install }
-
-# 3. Start the Python backend (Background)
-Write-Host "Starting Python backend on port $BackendPort ..." -ForegroundColor Cyan
-
-# Use TRIPLE backtick to ensure $env:PYTHONPATH reaches the REAL shell
-$backendCmd = "`$env:PYTHONPATH = '$PSScriptRoot;$PSScriptRoot\src'; Set-Location '$PSScriptRoot'; uv run uvicorn readly_mcp.server:app --host 127.0.0.1 --port $BackendPort --log-level info"
-
-Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd -WindowStyle Normal
-
-# 4. Run server (Vite dev)
-Write-Host "Starting Vite frontend on port $WebPort ..." -ForegroundColor Green
-npm run dev -- --port $WebPort --host
-
+Write-Host 'Starting Standardized Fullstack Hybrid...' -ForegroundColor Green
+# Launch backend Hidden by default to prevent console spam
+Start-Process pwsh -ArgumentList '-NoProfile', '-Command', 'uv run -m readly_mcp' -WindowStyle Hidden
+Set-Location web_sota
+npm run dev
