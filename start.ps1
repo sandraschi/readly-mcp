@@ -13,8 +13,17 @@ $env:FASTMCP_LOG_LEVEL = 'WARNING'
 Write-Host 'Starting readly-mcp...' -ForegroundColor Cyan
 
 Set-Location $PSScriptRoot
-Write-Host 'Starting Standardized Fullstack Hybrid...' -ForegroundColor Green
-# Launch backend Hidden by default to prevent console spam
-Start-Process pwsh -ArgumentList '-NoProfile', '-Command', 'uv run -m readly_mcp' -WindowStyle Hidden
+
+$WebPort = 10706
+$BackendPort = 10863
+
+Write-Host "Starting Python backend on port $BackendPort ..." -ForegroundColor Cyan
+Start-Process pwsh -ArgumentList '-NoProfile', '-Command', "`$env:WEB_PORT = '$BackendPort'; uv run -m readly_mcp" -WindowStyle Hidden
+
+Start-Sleep -Seconds 2
+
+Write-Host "Starting Vite frontend on port $WebPort ..." -ForegroundColor Green
 Set-Location web_sota
-npm run dev
+$env:VITE_API_TARGET = "http://127.0.0.1:$BackendPort"
+$env:VITE_PORT = "$WebPort"
+npm run dev -- --port $WebPort --host
