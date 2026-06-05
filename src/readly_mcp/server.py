@@ -27,7 +27,7 @@ logger = logging.getLogger("readly-mcp")
 mcp = FastMCP(
     name="Readly Scraper",
     instructions="MCP server for scraping Readly magazines and generating PDFs",
-    version="0.1.0",
+    version="0.2.1",
 )
 
 # Global ephemeral state
@@ -135,6 +135,13 @@ async def scraping_worker(issue_name: str, duration_per_page: float, max_pages: 
 # --- MCP Tools ---
 
 
+async def _ensure_browser() -> None:
+    try:
+        await browser_manager.start_browser(headless=False)
+    except Exception as exc:
+        logger.debug("Browser already running: %s", exc)
+
+
 @mcp.tool()
 async def open_readly_browser() -> str:
     """Opens the browser and navigates to Readly. Auto-logs in if READLY_AUTH_TOKEN env var is set.
@@ -185,13 +192,24 @@ def stop_scrape() -> str:
 
 
 @mcp.tool()
+async def open_latest_issue(magazine_name: str) -> dict:
+    """Search Readly and open the latest issue for a magazine by name."""
+    await _ensure_browser()
+    return await browser_manager.open_latest_issue(magazine_name)
+
+
+@mcp.tool()
+async def read_all_articles(max_articles: int = 10) -> dict:
+    """Batch-extract full text for articles on the current issue page."""
+    await _ensure_browser()
+    return await browser_manager.read_all_articles(max_articles=max_articles)
+
+
+@mcp.tool()
 async def list_articles() -> dict:
     """Parse the current Readly magazine page and extract article titles + URLs.
     Requires the browser to be on a magazine issue page."""
-    try:
-        await browser_manager.start_browser(headless=False)
-    except Exception as exc:
-        logger.debug("Browser already running: %s", exc)
+    await _ensure_browser()
     return await browser_manager.list_articles()
 
 
@@ -246,7 +264,7 @@ async def api_get_status():
 
 @app.get("/api/health")
 async def api_health():
-    return {"status": "healthy", "version": "0.1.0", "mcp_connected": True}
+    return {"status": "healthy", "version": "0.2.1", "mcp_connected": True}
 
 
 @app.get("/api/tools")
@@ -268,12 +286,23 @@ async def api_stop_scrape():
     return {"message": stop_scrape()}
 
 
+@app.get("/api/magazines/latest")
+async def api_open_latest(name: str = ""):
+    if not name.strip():
+        raise HTTPException(status_code=400, detail="name parameter required")
+    await _ensure_browser()
+    return await browser_manager.open_latest_issue(name)
+
+
+@app.get("/api/articles/read-all")
+async def api_read_all_articles(max: int = 10):
+    await _ensure_browser()
+    return await browser_manager.read_all_articles(max_articles=max)
+
+
 @app.get("/api/articles/list")
 async def api_list_articles():
-    try:
-        await browser_manager.start_browser(headless=False)
-    except Exception as exc:
-        logger.debug("Browser already running: %s", exc)
+    await _ensure_browser()
     return await browser_manager.list_articles()
 
 
@@ -306,6 +335,75 @@ async def api_list_library():
     return await browser_manager.list_library()
 
 
+@app.get("/api/magazines/open")
+async def api_open_magazine(url: str = ""):
+    if not url:
+        raise HTTPException(status_code=400, detail="url parameter is required")
+    try:
+        await browser_manager.start_browser(headless=False)
+    except Exception as exc:
+        logger.debug("Browser already running: %s", exc)
+    return await browser_manager.open_url(url)
+
+
+@app.post("/api/content/match")
+async def api_content_match(body: dict):
+    """Search watch-list magazines on Readly for articles matching a query (e.g. arXiv paper title)."""
+    query = str(body.get("query") or "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="query is required")
+    magazines = body.get("magazines")
+    if magazines is not None and not isinstance(magazines, list):
+        raise HTTPException(status_code=400, detail="magazines must be a list")
+    try:
+        await browser_manager.start_browser(headless=False)
+    except Exception as exc:
+        logger.debug("Browser already running: %s", exc)
+    return await browser_manager.match_magazine_articles(
+        query,
+        magazines,
+        max_per_magazine=int(body.get("max_per_magazine") or 3),
+    )
+
+
+@app.get("/api/pipeline/liveness")
+async def api_pipeline_liveness():
+    """Fleet probe: auth token, browser, scrape job state."""
+    from readly_mcp.core.browser import get_last_poll_stats
+
+    token = bool(os.environ.get("READLY_AUTH_TOKEN", "").strip())
+    browser_up = browser_manager.page is not None
+    alerts: list[dict] = []
+    if not token:
+        alerts.append(
+            {
+                "severity": "warning",
+                "code": "READLY_AUTH_TOKEN_MISSING",
+                "message": "READLY_AUTH_TOKEN not set — login may fail",
+            }
+        )
+    if scraping_state.get("is_running"):
+        alerts.append(
+            {
+                "severity": "info",
+                "code": "READLY_SCRAPE_ACTIVE",
+                "message": f"Scrape running: {scraping_state.get('issue_name')}",
+            }
+        )
+    last_poll = get_last_poll_stats()
+    return {
+        "success": True,
+        "healthy": True,
+        "service": "readly-mcp",
+        "version": "0.2.1",
+        "auth_token_set": token,
+        "browser_active": browser_up,
+        "scrape_status": scraping_state.get("status"),
+        "last_poll": last_poll,
+        "alerts": alerts,
+    }
+
+
 @app.post("/api/auth/token")
 async def api_set_auth_token(token: str = ""):
     """Set the Readly auth token (stored in env, not persisted to disk)."""
@@ -330,7 +428,7 @@ async def api_update_settings(body: dict):
 # --- LLM Endpoints ---
 
 
-@ app.get("/api/settings")
+@app.get("/api/settings")
 async def api_get_settings():
     """Return current LLM settings."""
     return {
