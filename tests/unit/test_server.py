@@ -29,6 +29,7 @@ def test_server_tools_exist():
     expected = {
         "open_readly_browser", "smart_scrape", "get_status", "stop_scrape",
         "list_articles", "extract_article_text", "search_magazines",
+        "open_latest_issue", "read_all_articles",
     }
     missing = expected - tool_names
     assert not missing, f"Missing tools: {missing}"

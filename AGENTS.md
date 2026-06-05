@@ -15,6 +15,15 @@ MCP server for scraping Readly magazines
 ## Key Files
 - `README.md` — full documentation
 - `pyproject.toml` — build config and entry points
+- `CHANGELOG.md` — release notes
 - `CLAUDE.md` — Claude Code context (if present)
 
 Install docs: follow mcp-central-docs/standards/AGENT_INSTALL_REFERENCE.md
+
+## Quick Ref
+
+```powershell
+uv run pytest tests/ -q
+```
+
+See `justfile` for available recipes.
