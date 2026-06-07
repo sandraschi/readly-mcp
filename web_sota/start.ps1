@@ -1,4 +1,4 @@
-﻿Param([switch]$Headless)
+Param([switch]$Headless)
 
 # --- SOTA Headless Standard ---
 if ($Headless -and ($Host.UI.RawUI.WindowTitle -notmatch 'Hidden')) {
@@ -33,7 +33,7 @@ $backendCmd = "`$env:PYTHONPATH = '$PSScriptRoot;$PSScriptRoot\src'; `$env:WEB_P
 
 Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd -WindowStyle Normal
 
-# 4. Run server (Vite dev) — pass VITE_API_TARGET so vite.config.ts uses correct backend port
+# 4. Run server (Vite dev) - pass VITE_API_TARGET so vite.config.ts uses correct backend port
 Write-Host "Starting Vite frontend on port $WebPort ..." -ForegroundColor Green
 
 $env:VITE_API_TARGET = "http://127.0.0.1:$BackendPort"
