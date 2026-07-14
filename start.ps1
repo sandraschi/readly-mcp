@@ -16,6 +16,13 @@ Set-Location $PSScriptRoot
 
 $WebPort = 10706
 $BackendPort = 10863
+$FleetStartPath = Join-Path $ProjectRoot "scripts\FleetStartMode.ps1"
+if (-not (Test-Path -LiteralPath $FleetStartPath)) {
+    Write-Host "ERROR: Missing vendored launcher helper: $FleetStartPath" -ForegroundColor Red
+    exit 1
+}
+. $FleetStartPath
+
 
 Write-Host "Starting Python backend on port $BackendPort ..." -ForegroundColor Cyan
 Start-Process pwsh -ArgumentList '-NoProfile', '-Command', "`$env:WEB_PORT = '$BackendPort'; uv run -m readly_mcp" -WindowStyle Hidden
