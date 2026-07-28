@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import API_BASE from "@/lib/api";
 
 interface HealthData {
   status: string;
@@ -33,19 +34,19 @@ interface ToolData {
 export function Status() {
   const { data: health } = useQuery<HealthData>({
     queryKey: ["health"],
-    queryFn: () => fetch("/api/health").then((res) => res.json()),
+    queryFn: () => fetch(`${API_BASE}/api/health`).then((res) => res.json()),
     refetchInterval: 10000,
   });
 
   const { data: scraper } = useQuery<ScraperStatus>({
     queryKey: ["scraper-status"],
-    queryFn: () => fetch("/api/status").then((res) => res.json()),
+    queryFn: () => fetch(`${API_BASE}/api/status`).then((res) => res.json()),
     refetchInterval: 5000,
   });
 
   const { data: tools, isLoading: toolsLoading } = useQuery<ToolData[]>({
     queryKey: ["tools"],
-    queryFn: () => fetch("/api/tools").then((res) => res.json()),
+    queryFn: () => fetch(`${API_BASE}/api/tools`).then((res) => res.json()),
   });
 
   return (

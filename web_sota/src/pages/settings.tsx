@@ -1,12 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import {
-  CheckCircle2,
-  Cpu,
-  Loader2,
-  Save,
-  XCircle,
-} from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, Cpu, Loader2, Save, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,52 +10,60 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import API_BASE from "@/lib/api";
 
-interface LlmModels {
-  ok: boolean;
-  provider: string;
+interface LlmProvider {
+  id: string;
+  label: string;
+  base_url: string;
   models: string[];
-  error?: string;
+  needs_key: boolean;
+}
+
+interface ProvidersResponse {
+  providers: LlmProvider[];
 }
 
 export function Settings() {
   const [backendUrl, setBackendUrl] = useState("http://localhost:10863");
-  const [testStatus, setTestStatus] = useState<"idle" | "testing" | "ok" | "fail">("idle");
+  const [testStatus, setTestStatus] = useState<
+    "idle" | "testing" | "ok" | "fail"
+  >("idle");
   const [scrapeInterval, setScrapeInterval] = useState("120");
   const [maxPages, setMaxPages] = useState("200");
   const [saved, setSaved] = useState(false);
-  const [authToken, setAuthToken] = useState(() =>
-    localStorage.getItem("readly-auth-token") || ""
+  const [authToken, setAuthToken] = useState(
+    () => localStorage.getItem("readly-auth-token") || "",
   );
   const [tokenSent, setTokenSent] = useState(false);
 
-  const [llmProvider, setLlmProvider] = useState(() =>
-    localStorage.getItem("readly-llm-provider") || "ollama"
+  const [providers, setProviders] = useState<LlmProvider[]>([]);
+  const [llmProvider, setLlmProvider] = useState(
+    () => localStorage.getItem("readly-llm-provider") || "ollama",
   );
-  const [llmModel, setLlmModel] = useState(() =>
-    localStorage.getItem("readly-llm-model") || "qwen3.5:27b"
+  const [llmModel, setLlmModel] = useState(
+    () => localStorage.getItem("readly-llm-model") || "qwen3.5:27b",
   );
-  const [llmUrl, setLlmUrl] = useState(() =>
-    localStorage.getItem("readly-llm-url") || "http://localhost:11434"
+  const [llmUrl, setLlmUrl] = useState(
+    () => localStorage.getItem("readly-llm-url") || "http://localhost:11434",
   );
-  const [llmKey, setLlmKey] = useState(() =>
-    localStorage.getItem("readly-llm-key") || ""
+  const [llmKey, setLlmKey] = useState(
+    () => localStorage.getItem("readly-llm-key") || "",
   );
   const [llmSaved, setLlmSaved] = useState(false);
 
-  const { data: ollamaModels } = useQuery<LlmModels>({
-    queryKey: ["ollama-models"],
-    queryFn: () => fetch("/api/llm/models?provider=ollama").then((r) => r.json()),
-    enabled: llmProvider === "ollama",
-    refetchInterval: 60000,
-  });
+  useEffect(() => {
+    fetch(`${API_BASE}/api/llm/providers`)
+      .then((r) => r.json() as Promise<ProvidersResponse>)
+      .then((data) => setProviders(data.providers))
+      .catch(() => setProviders([]));
+  }, []);
 
-  const { data: lmstudioModels } = useQuery<LlmModels>({
-    queryKey: ["lmstudio-models"],
-    queryFn: () => fetch("/api/llm/models?provider=lmstudio").then((r) => r.json()),
-    enabled: llmProvider === "lmstudio",
-    refetchInterval: 60000,
-  });
+  const discoveredProviders = providers;
+  const currentDiscovered = discoveredProviders.find(
+    (p) => p.id === llmProvider,
+  );
+  const mergedModels = currentDiscovered?.models || [];
 
   const handleTest = async () => {
     setTestStatus("testing");
@@ -119,7 +120,7 @@ export function Settings() {
     }
 
     try {
-      await fetch("/api/settings/llm", {
+      await fetch(`${API_BASE}/api/settings/llm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -132,11 +133,7 @@ export function Settings() {
     setTimeout(() => setLlmSaved(false), 2000);
   };
 
-  const availableModels = llmProvider === "ollama"
-    ? ollamaModels?.models || []
-    : llmProvider === "lmstudio"
-      ? lmstudioModels?.models || []
-      : [];
+  const availableModels = mergedModels;
 
   return (
     <div className="space-y-6">
@@ -245,7 +242,9 @@ export function Settings() {
                   type="number"
                   min={10}
                 />
-                <p className="text-xs text-slate-500">Seconds between page turns</p>
+                <p className="text-xs text-slate-500">
+                  Seconds between page turns
+                </p>
               </div>
               <div className="grid gap-2">
                 <Label className="text-slate-300">Max Pages</Label>
@@ -271,7 +270,8 @@ export function Settings() {
               </div>
             </CardTitle>
             <CardDescription className="text-slate-400">
-              Configure local LLM for the command interface and article extraction
+              Configure local LLM for the command interface and article
+              extraction
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -280,10 +280,22 @@ export function Settings() {
               <select
                 className="bg-slate-900 border border-slate-800 text-slate-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 value={llmProvider}
-                onChange={(e) => setLlmProvider(e.target.value)}
+                onChange={(e) => {
+                  setLlmProvider(e.target.value);
+                  const p = discoveredProviders.find(
+                    (x) => x.id === e.target.value,
+                  );
+                  if (p) {
+                    setLlmUrl(p.base_url);
+                    if (p.models.length > 0) setLlmModel(p.models[0]);
+                  }
+                }}
               >
-                <option value="ollama">Ollama (Local)</option>
-                <option value="lmstudio">LM Studio (Local)</option>
+                {discoveredProviders.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label} {p.models.length === 0 ? "(offline)" : ""}
+                  </option>
+                ))}
                 <option value="openai">OpenAI Compatible</option>
               </select>
             </div>
@@ -315,7 +327,9 @@ export function Settings() {
               {availableModels.length > 0 && (
                 <p className="text-xs text-slate-500">
                   Detected models: {availableModels.slice(0, 6).join(", ")}
-                  {availableModels.length > 6 ? ` +${availableModels.length - 6} more` : ""}
+                  {availableModels.length > 6
+                    ? ` +${availableModels.length - 6} more`
+                    : ""}
                 </p>
               )}
             </div>

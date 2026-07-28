@@ -1,6 +1,7 @@
 import asyncio
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 @pytest.mark.skip(reason="conftest mock needs async overhaul for Playwright 1.40+")
@@ -27,9 +28,15 @@ def test_server_tools_exist():
     tool_names = {t.name for t in tools}
 
     expected = {
-        "open_readly_browser", "smart_scrape", "get_status", "stop_scrape",
-        "list_articles", "extract_article_text", "search_magazines",
-        "open_latest_issue", "read_all_articles",
+        "open_readly_browser",
+        "smart_scrape",
+        "get_status",
+        "stop_scrape",
+        "list_articles",
+        "extract_article_text",
+        "search_magazines",
+        "open_latest_issue",
+        "read_all_articles",
     }
     missing = expected - tool_names
     assert not missing, f"Missing tools: {missing}"
