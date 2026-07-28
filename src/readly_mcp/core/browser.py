@@ -7,11 +7,26 @@ from playwright.async_api import BrowserContext, Page, Playwright, async_playwri
 
 log = logging.getLogger(__name__)
 
-_NAV_TITLE_BLOCKLIST = frozenset({
-    "home", "my library", "search", "discover", "categories", "newsstand",
-    "settings", "account", "sign in", "log in", "readly", "back", "menu",
-    "magazines", "newspapers", "podcasts",
-})
+_NAV_TITLE_BLOCKLIST = frozenset(
+    {
+        "home",
+        "my library",
+        "search",
+        "discover",
+        "categories",
+        "newsstand",
+        "settings",
+        "account",
+        "sign in",
+        "log in",
+        "readly",
+        "back",
+        "menu",
+        "magazines",
+        "newspapers",
+        "podcasts",
+    }
+)
 
 _last_poll_stats: dict = {
     "magazines_attempted": 0,
@@ -57,9 +72,7 @@ def _quality_check_articles(raw: list[dict]) -> dict:
     if not cleaned:
         return {"articles": [], "extraction_failed": True, "reason": "no_articles_after_filter"}
 
-    nav_hits = sum(
-        1 for a in raw if (a.get("title") or "").strip().lower() in _NAV_TITLE_BLOCKLIST
-    )
+    nav_hits = sum(1 for a in raw if (a.get("title") or "").strip().lower() in _NAV_TITLE_BLOCKLIST)
     if nav_hits >= 2 and nav_hits >= max(1, len(raw) // 2):
         return {"articles": [], "extraction_failed": True, "reason": "nav_elements_detected"}
 
@@ -67,6 +80,7 @@ def _quality_check_articles(raw: list[dict]) -> dict:
         return {"articles": [], "extraction_failed": True, "reason": "nav_elements_detected"}
 
     return {"articles": cleaned, "extraction_failed": False}
+
 
 # Determine paths relative to where the server runs (usually repo root)
 # Ideally, we should allow configuration or usage of standard app data paths.
@@ -156,16 +170,18 @@ class BrowserManager:
         if not self.context:
             return
         try:
-            await self.context.add_cookies([
-                {
-                    "name": "readlyAuth",
-                    "value": token,
-                    "domain": domain,
-                    "path": "/",
-                    "secure": True,
-                    "httpOnly": True,
-                }
-            ])
+            await self.context.add_cookies(
+                [
+                    {
+                        "name": "readlyAuth",
+                        "value": token,
+                        "domain": domain,
+                        "path": "/",
+                        "secure": True,
+                        "httpOnly": True,
+                    }
+                ]
+            )
             logger = __import__("logging").getLogger("readly-mcp")
             logger.info("Auto-login: readlyAuth cookie set for %s", domain)
         except Exception as exc:
@@ -181,9 +197,7 @@ class BrowserManager:
             raise RuntimeError("Browser not started")
 
         # Sanitize issue name for directory usage
-        issue_safe_name = "".join(
-            [c for c in issue_name if c.isalnum() or c in (" ", "-", "_")]
-        ).strip()
+        issue_safe_name = "".join([c for c in issue_name if c.isalnum() or c in (" ", "-", "_")]).strip()
         save_dir = os.path.join(SCREENSHOTS_DIR, issue_safe_name)
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -215,9 +229,7 @@ class BrowserManager:
         for _ in range(5):
             await self.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             await asyncio.sleep(1.0)
-            count = await self.page.evaluate(
-                """() => document.querySelectorAll('a[href*="/read/"]').length"""
-            )
+            count = await self.page.evaluate("""() => document.querySelectorAll('a[href*="/read/"]').length""")
             if count == prev_count:
                 break
             prev_count = count
@@ -287,10 +299,7 @@ class BrowserManager:
         return {
             "issue_title": page_title,
             "page_url": page_url,
-            "articles": [
-                {"title": a["title"], "url": a["url"], "index": i}
-                for i, a in enumerate(cleaned)
-            ],
+            "articles": [{"title": a["title"], "url": a["url"], "index": i} for i, a in enumerate(cleaned)],
             "count": len(cleaned),
         }
 
@@ -495,24 +504,26 @@ class BrowserManager:
 
             extracted = await self.extract_article_text(int(meta.get("index", i)))
             if extracted.get("error"):
-                skipped.append({
-                    "index": meta.get("index"),
-                    "title": meta.get("title"),
-                    "error": extracted["error"],
-                })
+                skipped.append(
+                    {
+                        "index": meta.get("index"),
+                        "title": meta.get("title"),
+                        "error": extracted["error"],
+                    }
+                )
                 continue
             if extracted.get("word_count", 0) < 50:
-                skipped.append({
-                    "index": meta.get("index"),
-                    "title": meta.get("title"),
-                    "error": "low_word_count",
-                })
+                skipped.append(
+                    {
+                        "index": meta.get("index"),
+                        "title": meta.get("title"),
+                        "error": "low_word_count",
+                    }
+                )
                 continue
             results.append(extracted)
 
-        avg_wc = (
-            sum(a.get("word_count", 0) for a in results) / len(results) if results else 0
-        )
+        avg_wc = sum(a.get("word_count", 0) for a in results) / len(results) if results else 0
         record_poll_stats(
             magazines_attempted=1,
             articles_extracted=len(results),

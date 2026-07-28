@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from typing import Any
-from urllib.request import urlopen, Request
+from urllib.request import Request, urlopen
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -246,7 +246,7 @@ async def list_library() -> dict:
 
 # --- FastAPI API Bridge ---
 
-_mcp_http = mcp.http_app(path="/mcp")
+_mcp_http = mcp.http_app(path="/")
 
 app = FastAPI(title="Readly MCP API", lifespan=_mcp_http.lifespan)
 app.add_middleware(
@@ -478,8 +478,7 @@ async def api_list_llm_models(provider: str = "ollama"):
     elif provider == "lmstudio":
         url = os.environ.get("LMSTUDIO_URL", "http://localhost:1234/v1")
         try:
-            req = Request(f"{url}/models", method="GET",
-                          headers={"Content-Type": "application/json"})
+            req = Request(f"{url}/models", method="GET", headers={"Content-Type": "application/json"})
             with urlopen(req, timeout=5) as resp:
                 data = json.loads(resp.read())
             models = [m["id"] for m in data.get("data", [])]
@@ -500,14 +499,15 @@ async def api_llm_chat(body: dict):
     if provider == "ollama":
         model = body.get("model", os.environ.get("OLLAMA_MODEL", "qwen3.5:27b"))
         url = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-        payload = json.dumps({
-            "model": model,
-            "messages": [{"role": "user", "content": message}],
-            "stream": False,
-        }).encode()
+        payload = json.dumps(
+            {
+                "model": model,
+                "messages": [{"role": "user", "content": message}],
+                "stream": False,
+            }
+        ).encode()
         try:
-            req = Request(f"{url}/api/chat", data=payload,
-                          headers={"Content-Type": "application/json"})
+            req = Request(f"{url}/api/chat", data=payload, headers={"Content-Type": "application/json"})
             with urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read())
             return {"ok": True, "response": data.get("message", {}).get("content", "")}
@@ -517,14 +517,15 @@ async def api_llm_chat(body: dict):
     elif provider == "lmstudio":
         model = body.get("model", os.environ.get("LMSTUDIO_MODEL", ""))
         url = os.environ.get("LMSTUDIO_URL", "http://localhost:1234/v1")
-        payload = json.dumps({
-            "model": model,
-            "messages": [{"role": "user", "content": message}],
-            "max_tokens": 1024,
-        }).encode()
+        payload = json.dumps(
+            {
+                "model": model,
+                "messages": [{"role": "user", "content": message}],
+                "max_tokens": 1024,
+            }
+        ).encode()
         try:
-            req = Request(f"{url}/chat/completions", data=payload,
-                          headers={"Content-Type": "application/json"})
+            req = Request(f"{url}/chat/completions", data=payload, headers={"Content-Type": "application/json"})
             with urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read())
             return {"ok": True, "response": data.get("choices", [{}])[0].get("message", {}).get("content", "")}
@@ -537,11 +538,13 @@ async def api_llm_chat(body: dict):
         api_key = body.get("api_key", os.environ.get("LOCAL_LLM_KEY", ""))
         if not url:
             return {"ok": False, "error": "No OpenAI-compatible URL configured"}
-        payload = json.dumps({
-            "model": model,
-            "messages": [{"role": "user", "content": message}],
-            "max_tokens": 1024,
-        }).encode()
+        payload = json.dumps(
+            {
+                "model": model,
+                "messages": [{"role": "user", "content": message}],
+                "max_tokens": 1024,
+            }
+        ).encode()
         headers = {"Content-Type": "application/json"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
@@ -554,6 +557,65 @@ async def api_llm_chat(body: dict):
             return {"ok": False, "error": str(e)}
 
     return {"ok": False, "error": f"Unknown provider: {provider}"}
+
+
+@app.get("/api/llm/providers")
+async def api_llm_providers():
+    """Discover local LLM providers (Ollama, LM Studio) and their models."""
+    import httpx
+
+    providers = []
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            resp = await client.get("http://127.0.0.1:11434/api/tags")
+            if resp.status_code == 200:
+                data = resp.json()
+                models = [m["name"] for m in data.get("models", [])]
+                providers.append(
+                    {
+                        "id": "ollama",
+                        "label": "Ollama",
+                        "base_url": "http://127.0.0.1:11434/v1",
+                        "models": models,
+                        "needs_key": False,
+                    }
+                )
+    except Exception:
+        providers.append(
+            {
+                "id": "ollama",
+                "label": "Ollama",
+                "base_url": "http://127.0.0.1:11434/v1",
+                "models": [],
+                "needs_key": False,
+            }
+        )
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            resp = await client.get("http://127.0.0.1:1234/v1/models")
+            if resp.status_code == 200:
+                data = resp.json()
+                models = [m["id"] for m in data.get("data", [])]
+                providers.append(
+                    {
+                        "id": "lmstudio",
+                        "label": "LM Studio",
+                        "base_url": "http://127.0.0.1:1234/v1",
+                        "models": models,
+                        "needs_key": False,
+                    }
+                )
+    except Exception:
+        providers.append(
+            {
+                "id": "lmstudio",
+                "label": "LM Studio",
+                "base_url": "http://127.0.0.1:1234/v1",
+                "models": [],
+                "needs_key": False,
+            }
+        )
+    return {"providers": providers}
 
 
 @app.get("/api/llm/status")
@@ -580,8 +642,7 @@ async def api_llm_status():
         url = os.environ.get("LMSTUDIO_URL", "http://localhost:1234/v1")
         model = os.environ.get("LMSTUDIO_MODEL", "")
         try:
-            req = Request(f"{url}/models", method="GET",
-                          headers={"Content-Type": "application/json"})
+            req = Request(f"{url}/models", method="GET", headers={"Content-Type": "application/json"})
             with urlopen(req, timeout=5) as resp:
                 data = json.loads(resp.read())
             models = [m["id"] for m in data.get("data", [])]
@@ -612,8 +673,6 @@ def main():
     http_thread.start()
     logger.info("HTTP bridge running on port %d", web_port)
     run_server(mcp, server_name="readly-mcp")
-
-
 
 
 if __name__ == "__main__":

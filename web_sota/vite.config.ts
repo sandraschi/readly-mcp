@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -12,8 +12,8 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: ['goliath'],
-    port: parseInt(process.env.VITE_PORT || "10846"),
+    allowedHosts: ["goliath"],
+    port: parseInt(process.env.VITE_PORT || "10846", 10),
     host: process.env.VITE_HOST || "127.0.0.1",
     proxy: {
       "/api": {

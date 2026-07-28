@@ -1,14 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  Activity,
-  AlertCircle,
-  CheckCircle2,
-  Cpu,
-  HardDrive,
-  Network,
-  Shield,
-} from "lucide-react";
+import { Activity, Cpu, HardDrive, Network, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import API_BASE from "@/lib/api";
 
 interface HealthData {
   status: string;
@@ -35,19 +28,19 @@ interface LlmStatus {
 export function Dashboard() {
   const { data: health } = useQuery<HealthData>({
     queryKey: ["health"],
-    queryFn: () => fetch("/api/health").then((r) => r.json()),
+    queryFn: () => fetch(`${API_BASE}/api/health`).then((r) => r.json()),
     refetchInterval: 15000,
   });
 
   const { data: scraper } = useQuery<ScraperStatus>({
     queryKey: ["scraper-status"],
-    queryFn: () => fetch("/api/status").then((r) => r.json()),
+    queryFn: () => fetch(`${API_BASE}/api/status`).then((r) => r.json()),
     refetchInterval: 10000,
   });
 
   const { data: llm } = useQuery<LlmStatus>({
     queryKey: ["llm-status"],
-    queryFn: () => fetch("/api/llm/status").then((r) => r.json()),
+    queryFn: () => fetch(`${API_BASE}/api/llm/status`).then((r) => r.json()),
     refetchInterval: 30000,
   });
 
@@ -68,14 +61,26 @@ export function Dashboard() {
             <CardTitle className="text-sm font-medium text-slate-200">
               Service Status
             </CardTitle>
-            <Shield className={health?.status === "healthy" ? "h-4 w-4 text-emerald-500" : "h-4 w-4 text-yellow-500"} />
+            <Shield
+              className={
+                health?.status === "healthy"
+                  ? "h-4 w-4 text-emerald-500"
+                  : "h-4 w-4 text-yellow-500"
+              }
+            />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
-              {health ? (health.status === "healthy" ? "Online" : "Degraded") : "Checking..."}
+              {health
+                ? health.status === "healthy"
+                  ? "Online"
+                  : "Degraded"
+                : "Checking..."}
             </div>
             <p className="text-xs text-slate-400">
-              {health ? `v${health.version} · MCP ${health.mcp_connected ? "connected" : "disconnected"}` : "Connecting..."}
+              {health
+                ? `v${health.version} · MCP ${health.mcp_connected ? "connected" : "disconnected"}`
+                : "Connecting..."}
             </p>
           </CardContent>
         </Card>
@@ -85,11 +90,17 @@ export function Dashboard() {
             <CardTitle className="text-sm font-medium text-slate-200">
               Scraping Engine
             </CardTitle>
-            <Activity className={scraper?.is_running ? "h-4 w-4 text-orange-500" : "h-4 w-4 text-slate-500"} />
+            <Activity
+              className={
+                scraper?.is_running
+                  ? "h-4 w-4 text-orange-500"
+                  : "h-4 w-4 text-slate-500"
+              }
+            />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
-              {scraper?.is_running ? "Active" : (scraper ? "Idle" : "...")}
+              {scraper?.is_running ? "Active" : scraper ? "Idle" : "..."}
             </div>
             <p className="text-xs text-slate-400">
               {scraper?.is_running
@@ -106,7 +117,11 @@ export function Dashboard() {
             <CardTitle className="text-sm font-medium text-slate-200">
               LLM Provider
             </CardTitle>
-            <Cpu className={llm?.ok ? "h-4 w-4 text-blue-500" : "h-4 w-4 text-slate-500"} />
+            <Cpu
+              className={
+                llm?.ok ? "h-4 w-4 text-blue-500" : "h-4 w-4 text-slate-500"
+              }
+            />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
@@ -143,9 +158,35 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-[200px] font-mono text-xs p-4 overflow-y-auto border border-slate-800 rounded-md bg-slate-900/50 text-slate-400 space-y-1">
-              {health && <p className={health.status === "healthy" ? "text-emerald-400" : "text-yellow-400"}>[system] API: {health.status} (v{health.version})</p>}
-              {scraper && <p className={scraper.is_running ? "text-orange-400" : "text-slate-500"}>[scraper] Status: {scraper.status} · Pages: {scraper.pages_captured}</p>}
-              {llm && <p className={llm.ok ? "text-blue-400" : "text-red-400"}>[llm] {llm.provider}: {llm.ok ? `Online (${llm.model || "no model"})` : `Offline — ${llm.error || "not configured"}`}</p>}
+              {health && (
+                <p
+                  className={
+                    health.status === "healthy"
+                      ? "text-emerald-400"
+                      : "text-yellow-400"
+                  }
+                >
+                  [system] API: {health.status} (v{health.version})
+                </p>
+              )}
+              {scraper && (
+                <p
+                  className={
+                    scraper.is_running ? "text-orange-400" : "text-slate-500"
+                  }
+                >
+                  [scraper] Status: {scraper.status} · Pages:{" "}
+                  {scraper.pages_captured}
+                </p>
+              )}
+              {llm && (
+                <p className={llm.ok ? "text-blue-400" : "text-red-400"}>
+                  [llm] {llm.provider}:{" "}
+                  {llm.ok
+                    ? `Online (${llm.model || "no model"})`
+                    : `Offline — ${llm.error || "not configured"}`}
+                </p>
+              )}
               <div className="animate-pulse inline-block h-2 w-1 bg-slate-500 ml-1" />
             </div>
           </CardContent>
@@ -172,7 +213,9 @@ export function Dashboard() {
                     Heartbeat
                   </p>
                   <p className="text-xs text-slate-400">
-                    {health ? "Nominal ping tracking" : "Waiting for connection..."}
+                    {health
+                      ? "Nominal ping tracking"
+                      : "Waiting for connection..."}
                   </p>
                 </div>
               </div>

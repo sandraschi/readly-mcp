@@ -1,17 +1,18 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   BookOpen,
-  RefreshCw,
   ExternalLink,
-  Loader2,
-  Search,
   LibraryBig,
+  Loader2,
+  RefreshCw,
+  Search,
 } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import API_BASE from "@/lib/api";
 
 interface Magazine {
   title: string;
@@ -33,7 +34,7 @@ export function Library() {
     useQuery<LibraryData>({
       queryKey: ["library"],
       queryFn: () =>
-        fetch("/api/library").then((res) => {
+        fetch(`${API_BASE}/api/library`).then((res) => {
           if (!res.ok) throw new Error("Backend unreachable");
           return res.json();
         }),
@@ -44,7 +45,7 @@ export function Library() {
   const magazines = data?.magazines || [];
   const filtered = filter
     ? magazines.filter((m) =>
-        m.title.toLowerCase().includes(filter.toLowerCase())
+        m.title.toLowerCase().includes(filter.toLowerCase()),
       )
     : magazines;
   const grouped = groupBy(filtered, "type");
@@ -204,7 +205,7 @@ export function Library() {
 
 function groupBy<T extends Record<string, unknown>>(
   items: T[],
-  key: keyof T
+  key: keyof T,
 ): Record<string, T[]> {
   return items.reduce(
     (acc, item) => {
@@ -213,6 +214,6 @@ function groupBy<T extends Record<string, unknown>>(
       acc[k].push(item);
       return acc;
     },
-    {} as Record<string, T[]>
+    {} as Record<string, T[]>,
   );
 }

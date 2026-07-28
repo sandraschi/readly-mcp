@@ -7,6 +7,7 @@ import {
   Grid,
   HelpCircle,
   LayoutDashboard,
+  ScrollText,
   Server,
   Settings,
 } from "lucide-react";
@@ -28,6 +29,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     { href: "/apps", label: "Apps", icon: Grid },
     { href: "/help", label: "Help", icon: HelpCircle },
     { href: "/chat", label: "AI Command", icon: Bot },
+    { href: "/logs", label: "Logs", icon: ScrollText },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
 

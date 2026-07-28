@@ -9,6 +9,7 @@ import { Apps } from "@/pages/apps";
 import { Chat } from "@/pages/chat";
 import { Dashboard } from "@/pages/dashboard";
 import { Help } from "@/pages/help";
+import Logging from "@/pages/Logging";
 import { Library } from "@/pages/library";
 import { Settings } from "@/pages/settings";
 import { Status } from "@/pages/status";
@@ -25,6 +26,7 @@ function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/logs" element={<Logging />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppLayout>
