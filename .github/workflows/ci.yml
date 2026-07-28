@@ -1,41 +1,54 @@
+﻿# Fleet: mcp-central-docs/templates/ci.yml.template
 name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, master]
   pull_request:
-    branches: [ main ]
+    branches: [main, master]
+  workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11"]
-
+  check:
+    name: Lint & Test (Windows)
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .
-        pip install pytest pytest-asyncio pyright ruff
-        playwright install chromium
-        
-    - name: Lint with Ruff
-      run: |
-        ruff check src tests
-        
-    - name: Type check with Pyright
-      run: |
-        pyright
-        
-    - name: Run tests
-      run: |
-        pytest tests/
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web_sota/package-lock.json
+
+      - name: Install Python dependencies
+        run: uv sync --group dev
+
+      - name: Ruff check
+        run: uv run ruff check src tests
+
+      - name: Ruff format check
+        run: uv run ruff format --check src tests
+
+      - name: Pytest
+        run: uv run python -m pytest -q --tb=short
+
+      - name: Install web dependencies
+        run: npm ci
+        working-directory: web_sota
+
+      - name: Biome check
+        run: npm run biome:ci
+        working-directory: web_sota
