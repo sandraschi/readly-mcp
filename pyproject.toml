@@ -15,7 +15,6 @@ dependencies = [
     "fpdf2>=2.7.0",
     "pillow>=10.0.0",
     "uvicorn>=0.40.0",
-    "ruff>=0.15.2",
     "prefab-ui>=0.14.0",
     "httpx>=0.24.0",
 ]
@@ -38,10 +37,10 @@ ignore = ["S101", "B008"]
 quote-style = "double"
 indent-style = "space"
 
-[dependency-groups]
-dev = [
-    "pre-commit>=4.6.1",
-    "pytest>=9.0.3",
-    "pytest-asyncio>=1.3.0",
-]
+
+                param($m)
+                $inner = $m.Groups[2].Value.Trim()
+                $insert = if ($inner) { "$inner, `"$RuffPyprojectSpec`"" } else { "`"$RuffPyprojectSpec`"" }
+                $m.Groups[1].Value + $insert + $m.Groups[3].Value
+            
 
