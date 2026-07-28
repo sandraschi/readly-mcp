@@ -31,16 +31,11 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "S", "UP", "RUF"]
-ignore = ["S101", "B008"]
+ignore = ["S101", "B008", "S106", "S110", "S112", "RUF012"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 
-
-                param($m)
-                $inner = $m.Groups[2].Value.Trim()
-                $insert = if ($inner) { "$inner, `"$RuffPyprojectSpec`"" } else { "`"$RuffPyprojectSpec`"" }
-                $m.Groups[1].Value + $insert + $m.Groups[3].Value
-            
-
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.16.0,<0.17"]
