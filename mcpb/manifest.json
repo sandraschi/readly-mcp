@@ -1,0 +1,56 @@
+{
+  "manifest_version": "0.2",
+  "name": "readly-mcp",
+  "version": "0.2.1",
+  "description": "MCP server for scraping Readly magazines",
+  "author": { "name": "sandraschi" },
+  "server": {
+    "type": "python",
+    "entry_point": "src/readly_mcp/__main__.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run","--directory","${PWD}","python","-m","readly_mcp"],
+      "env": {
+        "PYTHONPATH": "${PWD}/src",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  },
+  "tools": [
+    { "name": "open_readly_browser", "description": "open_readly_browser" },
+    { "name": "smart_scrape", "description": "smart_scrape" },
+    { "name": "get_status", "description": "get_status" },
+    { "name": "stop_scrape", "description": "stop_scrape" },
+    { "name": "open_latest_issue", "description": "open_latest_issue" },
+    { "name": "read_all_articles", "description": "read_all_articles" },
+    { "name": "list_articles", "description": "list_articles" },
+    { "name": "extract_article_text", "description": "extract_article_text" },
+    { "name": "search_magazines", "description": "search_magazines" },
+    { "name": "list_library", "description": "list_library" },
+    { "name": "api_get_status", "description": "api_get_status" },
+    { "name": "api_health", "description": "api_health" },
+    { "name": "api_list_tools", "description": "api_list_tools" },
+    { "name": "api_start_scrape", "description": "api_start_scrape" },
+    { "name": "api_stop_scrape", "description": "api_stop_scrape" },
+    { "name": "api_open_latest", "description": "api_open_latest" },
+    { "name": "api_read_all_articles", "description": "api_read_all_articles" },
+    { "name": "api_list_articles", "description": "api_list_articles" },
+    { "name": "api_extract_article", "description": "api_extract_article" },
+    { "name": "api_search_magazines", "description": "api_search_magazines" },
+    { "name": "api_list_library", "description": "api_list_library" },
+    { "name": "api_open_magazine", "description": "api_open_magazine" },
+    { "name": "api_content_match", "description": "Search watch-list magazines on Readly for articles matching a query (e.g. arXiv paper title)." },
+    { "name": "api_pipeline_liveness", "description": "Fleet probe: auth token, browser, scrape job state." },
+    { "name": "api_set_auth_token", "description": "Set the Readly auth token (stored in env, not persisted to disk)." },
+    { "name": "api_update_settings", "description": "Update runtime settings (stored in env for current session)." },
+    { "name": "api_get_settings", "description": "Return current LLM settings." },
+    { "name": "api_update_llm_settings", "description": "Update LLM provider settings for the session." },
+    { "name": "api_list_llm_models", "description": "List available models from the configured LLM provider." },
+    { "name": "api_llm_chat", "description": "Send a chat message to the configured LLM." },
+    { "name": "api_llm_providers", "description": "Discover local LLM providers (Ollama, LM Studio) and their models." },
+    { "name": "api_llm_status", "description": "Check connectivity to the configured LLM provider." },
+    { "name": "main_stdio", "description": "main(stdio)" },
+    { "name": "main_http", "description": "main(http)" },
+    { "name": "main_sse", "description": "main(sse)" }
+  ]
+}
