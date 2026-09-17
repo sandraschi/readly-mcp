@@ -379,7 +379,7 @@ async def api_pipeline_liveness():
             {
                 "severity": "warning",
                 "code": "READLY_AUTH_TOKEN_MISSING",
-                "message": "READLY_AUTH_TOKEN not set — login may fail",
+                "message": "READLY_AUTH_TOKEN not set - login may fail",
             }
         )
     if scraping_state.get("is_running"):
@@ -665,7 +665,7 @@ def main():
     from .transport import run_server
 
     # Start HTTP bridge in background for REST API + MCP HTTP, then run stdio
-    web_port = int(os.getenv("WEB_PORT", "10863"))
+    web_port = int(os.getenv("WEB_PORT", "10737"))
     http_thread = threading.Thread(
         target=lambda: uvicorn.run(app, host="127.0.0.1", port=web_port, log_level="warning"),
         daemon=True,

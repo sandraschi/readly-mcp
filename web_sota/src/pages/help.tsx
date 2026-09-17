@@ -61,7 +61,7 @@ export function Help() {
           </CardHeader>
           <CardContent className="text-slate-400 space-y-4 text-sm">
             <p>
-              The backend exposes a REST API on port 10863. You can interact
+              The backend exposes a REST API on port 10737. You can interact
               with it directly if needed:
             </p>
             <div className="bg-slate-900 rounded p-3 font-mono text-[10px] overflow-x-auto border border-slate-800">
@@ -103,7 +103,7 @@ export function Help() {
             <ul className="list-disc list-inside space-y-1">
               <li>Browser visible/headless mode settings</li>
               <li>Internet connectivity to the source host</li>
-              <li>Port conflicts on 10862/10863</li>
+              <li>Port conflicts on 10862/10737</li>
             </ul>
           </CardContent>
         </Card>

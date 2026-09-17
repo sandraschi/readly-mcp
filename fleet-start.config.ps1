@@ -2,14 +2,15 @@
 # Edit ports/backend target here - start.ps1 is fleet-standard.
 @{
     Name         = 'readly-mcp'
-    BackendPort  = 10863
-    FrontendPort = 10706
+    BackendPort  = 10737
+    FrontendPort = 10736
     HealthPath   = '/api/health'
-    WebRoot      = 'D:\Dev\repos\readly-mcp\web_sota'
+    WebRoot      = 'web_sota'
     Backend = @{
         Kind          = 'uvicorn'
         UvicornTarget = 'readly_mcp.server:app'
-        Env           = @{ WEB_PORT = '10863' }
+        SyncExtras    = @('dev')
+        Env           = @{ WEB_PORT = '10737' }
     }
     Frontend = @{
         Kind           = 'vite-npm'

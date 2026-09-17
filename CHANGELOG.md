@@ -29,4 +29,4 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - FastMCP 3.2 server with Playwright scrape loop, PDF export, dual transport.
-- `web_sota` dashboard; ports **10863** / **10864** (backend / frontend per WEBAPP_PORTS).
+- `web_sota` dashboard; ports **10737** / **10864** (backend / frontend per WEBAPP_PORTS).

@@ -25,7 +25,7 @@ interface ProvidersResponse {
 }
 
 export function Settings() {
-  const [backendUrl, setBackendUrl] = useState("http://localhost:10863");
+  const [backendUrl, setBackendUrl] = useState("http://localhost:10737");
   const [testStatus, setTestStatus] = useState<
     "idle" | "testing" | "ok" | "fail"
   >("idle");
@@ -151,7 +151,7 @@ export function Settings() {
           <CardHeader>
             <CardTitle className="text-white">Backend Connection</CardTitle>
             <CardDescription className="text-slate-400">
-              URL of the readly-mcp REST API backend (default: port 10863)
+              URL of the readly-mcp REST API backend (default: port 10737)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -161,7 +161,7 @@ export function Settings() {
                 className="bg-slate-900 border-slate-800 text-slate-100 placeholder:text-slate-400"
                 value={backendUrl}
                 onChange={(e) => setBackendUrl(e.target.value)}
-                placeholder="http://localhost:10863"
+                placeholder="http://localhost:10737"
               />
             </div>
             <div className="flex items-center gap-3">

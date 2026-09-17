@@ -94,7 +94,7 @@ export function Status() {
                 : "Unknown"}
             </div>
             <p className="text-xs text-slate-400">
-              Port 10863 {health ? `v${health.version}` : ""}
+              Port 10737 {health ? `v${health.version}` : ""}
             </p>
           </CardContent>
         </Card>

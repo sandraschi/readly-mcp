@@ -36,7 +36,7 @@ The **Readly MCP Server** is a specialized Model Context Protocol (MCP) server d
 - **Framework**: FastMCP 3.2+
 - **Transport**: Stdio (primary), HTTP Streamable, SSE (capability) via `transport.py`
 - **Engine**: Playwright (Async API) with persistent browser context
-- **API Bridge**: FastAPI + uvicorn on configurable port (default 10863)
+- **API Bridge**: FastAPI + uvicorn on configurable port (default 10737)
 - **Image Processing**: Pillow & FPDF2
 
 ## 5. MCP Tools (v0.2.0)

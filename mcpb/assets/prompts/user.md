@@ -5,7 +5,7 @@
 readly-mcp enables automated access to Readly digital magazines through browser automation. To get started:
 
 1. Set READLY_AUTH_TOKEN if you have an existing Readly session token
-2. Start the server (default: stdio for MCP, HTTP bridge on port 10863)
+2. Start the server (default: stdio for MCP, HTTP bridge on port 10737)
 3. Open the browser: open_readly_browser()
 4. If no token is set, log in manually in the opened browser (cookies saved)
 5. Start exploring magazines, scraping issues, and extracting articles
@@ -217,7 +217,7 @@ Process multiple articles from an issue systematically.
 
 ### REST Endpoints
 
-The server exposes HTTP endpoints on the configured WEB_PORT (default 10863):
+The server exposes HTTP endpoints on the configured WEB_PORT (default 10737):
 
 **System Endpoints:**
 - GET /api/health: Health check

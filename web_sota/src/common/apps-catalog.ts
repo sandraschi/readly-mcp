@@ -43,8 +43,8 @@ export const APPS_CATALOG: AppEntry[] = [
     label: "Robotics Control",
     description: "Physical and virtual robot orchestration",
     icon: Bot,
-    url: "http://localhost:10706",
-    port: 10706,
+    url: "http://localhost:10736",
+    port: 10736,
     tags: ["hardware", "simulation"],
   },
   {

@@ -115,7 +115,7 @@ The server exposes all MCP tools as REST API endpoints plus additional functiona
 - LLM_PROVIDER: Active LLM provider (ollama, lmstudio, openai)
 - LOCAL_LLM_URL: OpenAI-compatible API URL
 - LOCAL_LLM_KEY: API key for OpenAI-compatible provider
-- WEB_PORT: Port for REST API bridge (default: 10863)
+- WEB_PORT: Port for REST API bridge (default: 10737)
 
 ### Storage
 - Screenshots are stored temporarily during scraping
