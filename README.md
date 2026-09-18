@@ -125,7 +125,7 @@ Once logged in:
 | `get_status` | Status | Current scraping job status |
 | `stop_scrape` | Control | Gracefully stop scraping job |
 
-## REST API (port 10737, via `--web` flag)
+## REST API (port 11201, via `--web` flag)
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -150,7 +150,7 @@ For web or SSE transport (FastAPI + uvicorn):
 ```bash
 uv run readly-mcp --web
 ```
-Uses `WEB_PORT` (default 10737). Requires FastAPI and uvicorn (included in dependencies).
+Uses `WEB_PORT` (default 11201). Requires FastAPI and uvicorn (included in dependencies).
 
 ### Testing
 ```bash
@@ -159,7 +159,7 @@ pytest
 
 ### Integration with aiwatcher-mcp
 readly-mcp v0.2+ serves as a content intelligence source for aiwatcher-mcp.
-Set `READLY_ENABLED=true` and `READLY_MCP_URL=http://localhost:10737` in aiwatcher-mcp's `.env`.
+Set `READLY_ENABLED=true` and `READLY_MCP_URL=http://localhost:11201` in aiwatcher-mcp's `.env`.
 
 ## Industrial Quality Stack
 

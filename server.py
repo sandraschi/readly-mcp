@@ -222,5 +222,5 @@ def stop_scraping_tool():
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("WEB_PORT", 10737))
+    port = int(os.getenv("WEB_PORT", 11201))
     uvicorn.run(app, host="0.0.0.0", port=port)

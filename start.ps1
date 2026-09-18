@@ -14,8 +14,8 @@ Write-Host 'Starting readly-mcp...' -ForegroundColor Cyan
 
 Set-Location $PSScriptRoot
 
-$WebPort = 10736
-$BackendPort = 10737
+$WebPort = 11200
+$BackendPort = 11201
 $FleetStartPath = Join-Path $ProjectRoot "scripts\FleetStartMode.ps1"
 if (-not (Test-Path -LiteralPath $FleetStartPath)) {
     Write-Host "ERROR: Missing vendored launcher helper: $FleetStartPath" -ForegroundColor Red

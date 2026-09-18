@@ -166,7 +166,7 @@ class BrowserManager:
         await self.page.goto(auth_url)
 
     async def _auto_login(self, domain: str, token: str) -> None:
-        """Set the Readly auth cookie before navigating — skips manual login."""
+        """Set the Readly auth cookie before navigating - skips manual login."""
         if not self.context:
             return
         try:
@@ -656,7 +656,7 @@ class BrowserManager:
                 }
             }
 
-            // Strategy 2: Fallback — grab all <img> with meaningful alt text
+            // Strategy 2: Fallback - grab all <img> with meaningful alt text
             if (results.length < 3) {
                 for (const img of document.querySelectorAll('img[alt]')) {
                     const alt = img.alt.trim();

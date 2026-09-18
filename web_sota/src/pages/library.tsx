@@ -116,7 +116,7 @@ export function Library() {
                   Settings)
                 </li>
                 <li>
-                  3. The Vite proxy is configured (port 10736 → port 10737)
+                  3. The Vite proxy is configured (port 11200 → port 11201)
                 </li>
               </ul>
               <Button

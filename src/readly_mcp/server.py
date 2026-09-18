@@ -665,7 +665,7 @@ def main():
     from .transport import run_server
 
     # Start HTTP bridge in background for REST API + MCP HTTP, then run stdio
-    web_port = int(os.getenv("WEB_PORT", "10737"))
+    web_port = int(os.getenv("WEB_PORT", "11201"))
     http_thread = threading.Thread(
         target=lambda: uvicorn.run(app, host="127.0.0.1", port=web_port, log_level="warning"),
         daemon=True,

@@ -25,7 +25,7 @@ export function Apps() {
     },
     {
       name: "Readly MCP",
-      port: 10737,
+      port: 11201,
       color: "text-orange-500",
       status: "Current",
     },
