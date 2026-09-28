@@ -9,3 +9,6 @@ user_data/
 # on every pack. Never hand-edit, never commit.
 mcpb/src/
 
+
+# Secrets live in .env only - never commit
+.env
