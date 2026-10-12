@@ -469,7 +469,7 @@ async def api_list_llm_models(provider: str = "ollama"):
         url = os.environ.get("OLLAMA_URL", "http://localhost:11434")
         try:
             req = Request(f"{url}/api/tags", method="GET")
-            with urlopen(req, timeout=5) as resp:
+            with await asyncio.to_thread(urlopen, req, timeout=5) as resp:
                 data = json.loads(resp.read())
             models = [m["name"] for m in data.get("models", [])]
             return {"ok": True, "provider": "ollama", "models": models}
@@ -479,7 +479,7 @@ async def api_list_llm_models(provider: str = "ollama"):
         url = os.environ.get("LMSTUDIO_URL", "http://localhost:1234/v1")
         try:
             req = Request(f"{url}/models", method="GET", headers={"Content-Type": "application/json"})
-            with urlopen(req, timeout=5) as resp:
+            with await asyncio.to_thread(urlopen, req, timeout=5) as resp:
                 data = json.loads(resp.read())
             models = [m["id"] for m in data.get("data", [])]
             return {"ok": True, "provider": "lmstudio", "models": models}
@@ -508,7 +508,7 @@ async def api_llm_chat(body: dict):
         ).encode()
         try:
             req = Request(f"{url}/api/chat", data=payload, headers={"Content-Type": "application/json"})
-            with urlopen(req, timeout=30) as resp:
+            with await asyncio.to_thread(urlopen, req, timeout=30) as resp:
                 data = json.loads(resp.read())
             return {"ok": True, "response": data.get("message", {}).get("content", "")}
         except Exception as e:
@@ -526,7 +526,7 @@ async def api_llm_chat(body: dict):
         ).encode()
         try:
             req = Request(f"{url}/chat/completions", data=payload, headers={"Content-Type": "application/json"})
-            with urlopen(req, timeout=30) as resp:
+            with await asyncio.to_thread(urlopen, req, timeout=30) as resp:
                 data = json.loads(resp.read())
             return {"ok": True, "response": data.get("choices", [{}])[0].get("message", {}).get("content", "")}
         except Exception as e:
@@ -550,7 +550,7 @@ async def api_llm_chat(body: dict):
             headers["Authorization"] = f"Bearer {api_key}"
         try:
             req = Request(f"{url}/chat/completions", data=payload, headers=headers)
-            with urlopen(req, timeout=30) as resp:
+            with await asyncio.to_thread(urlopen, req, timeout=30) as resp:
                 data = json.loads(resp.read())
             return {"ok": True, "response": data.get("choices", [{}])[0].get("message", {}).get("content", "")}
         except Exception as e:
@@ -629,7 +629,7 @@ async def api_llm_status():
         model = os.environ.get("OLLAMA_MODEL", "")
         try:
             req = Request(f"{url}/api/tags", method="GET")
-            with urlopen(req, timeout=5) as resp:
+            with await asyncio.to_thread(urlopen, req, timeout=5) as resp:
                 data = json.loads(resp.read())
             models = [m["name"] for m in data.get("models", [])]
             result["ok"] = True
@@ -643,7 +643,7 @@ async def api_llm_status():
         model = os.environ.get("LMSTUDIO_MODEL", "")
         try:
             req = Request(f"{url}/models", method="GET", headers={"Content-Type": "application/json"})
-            with urlopen(req, timeout=5) as resp:
+            with await asyncio.to_thread(urlopen, req, timeout=5) as resp:
                 data = json.loads(resp.read())
             models = [m["id"] for m in data.get("data", [])]
             result["ok"] = True
