@@ -12,3 +12,6 @@ mcpb/src/
 
 # Secrets live in .env only - never commit
 .env
+
+# added by wip-sweep v1 2026-10-13: generated dirs
+__pycache__/
